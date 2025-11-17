@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Lint with ruff
+      run: |
+        ruff check dalla/ --output-format=github
+        ruff format --check dalla/
+    
+    - name: Upload coverage
+      if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: false
+
+  build-onion:
+    name: Build Onion Binary for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: onion-linux-x86_64
+          - os: macos-latest
+            artifact_name: onion-darwin-x86_64
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install build dependencies
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsparsehash-dev
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          brew install google-sparsehash
+        fi
+    
+    - name: Build Onion
+      run: |
+        chmod +x scripts/build_onion.sh
+        ./scripts/build_onion.sh
+    
+    - name: Upload Onion Binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dalla/deduplication/bin/onion-*
+        if-no-files-found: error
+
+  quality-checks:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+    
+    - name: Install pre-commit
+      run: |
+        uv pip install --system pre-commit
+    
+    - name: Clean pre-commit cache
+      run: |
+        pre-commit clean
+    
+    - name: Run pre-commit hooks
+      run: |
+        pre-commit run --all-files

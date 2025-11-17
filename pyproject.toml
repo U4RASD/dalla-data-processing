@@ -1,0 +1,111 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dalla-data-processing"
+version = "0.0.1"
+description = "data processing pipeline with deduplication, stemming, quality checking, and readability scoring, used for the DALLA Models"
+authors = [
+    {name = "Hadi Hamoud", email = "hhamoud@dohainstitute.edu.qa"},
+    {name = "Digital Research Unit - Arab Center", email = "dru@dohainstitute.edu.qa"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = ["arabic", "nlp", "data-processing", "deduplication", "stemming", "readability", "quality"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+dependencies = [
+    "datasets>=2.14.0",
+    "transformers>=4.30.0",
+    "camel-tools>=1.5.0",
+    "click>=8.0.0",
+    "tqdm>=4.65.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "pyarrow>=12.0.0",
+    "textstat>=0.7.0",
+    "structlog>=24.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.0.0",
+]
+dedup-native = [
+    "cffi>=1.15.0",
+]
+all = [
+    "dalla-data-processing[dev,dedup-native]",
+]
+
+[project.scripts]
+dalla-dp = "dalla.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/U4RASD/dalla-data-processing"
+Documentation = "https://github.com/U4RASD/dalla-data-processing#readme"
+Repository = "https://github.com/U4RASD/dalla-data-processing"
+"Bug Tracker" = "https://github.com/U4RASD/dalla-data-processing/issues"
+
+[tool.setuptools]
+packages = ["dalla", "dalla.core", "dalla.deduplication", "dalla.stemming", "dalla.quality", "dalla.readability", "dalla.utils"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+dalla = ["py.typed"]
+"dalla.stemming" = ["data/*.txt"]
+"dalla.deduplication" = ["bin/*", "onion/**/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["dalla"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",
+    ]
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+known-first-party = ["dalla"]
+
+[tool.ruff.lint.per-file-ignores]
+"dalla/deduplication/onion/**/*.py" = ["N", "SIM", "UP"]  
+"dalla/stemming/__init__.py" = ["N802", "N806", "SIM102"]  
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.0.0",
+]

@@ -1,0 +1,245 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-onion:
+    name: Build Onion Binary for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: onion-linux-x86_64
+          - os: macos-latest
+            artifact_name: onion-darwin-x86_64
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install build dependencies
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsparsehash-dev
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          brew install google-sparsehash
+        fi
+    
+    - name: Build Onion
+      run: |
+        chmod +x scripts/build_onion.sh
+        ./scripts/build_onion.sh
+    
+    - name: Upload Onion Binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dalla/deduplication/bin/onion-*
+        if-no-files-found: error
+
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }}
+    needs: build-onion
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            onion_artifact: onion-linux-x86_64
+          - os: macos-latest
+            onion_artifact: onion-darwin-x86_64
+          - os: windows-latest
+            onion_artifact: none
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create bin directory
+      run: mkdir -p dalla/deduplication/bin
+      shell: bash
+    
+    - name: Download Onion binary
+      if: matrix.onion_artifact != 'none'
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ matrix.onion_artifact }}
+        path: dalla/deduplication/bin/
+    
+    - name: Set binary permissions
+      if: matrix.onion_artifact != 'none'
+      run: chmod +x dalla/deduplication/bin/onion-*
+      shell: bash
+    
+    - name: List binary files
+      if: matrix.onion_artifact != 'none'
+      run: ls -lah dalla/deduplication/bin/
+      shell: bash
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build wheel
+      run: python -m build
+    
+    - name: List wheel contents
+      run: |
+        python -m zipfile -l dist/*.whl | head -50
+    
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels-${{ matrix.os }}
+        path: dist/*
+
+  build-sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Build sdist
+      run: |
+        pip install build
+        python -m build --sdist
+    
+    - name: Upload sdist
+      uses: actions/upload-artifact@v4
+      with:
+        name: sdist
+        path: dist/*.tar.gz
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build-wheels, build-sdist]
+    runs-on: ubuntu-latest
+    environment: release
+    
+    steps:
+    # Only use Linux wheel to avoid conflicts
+    - uses: actions/download-artifact@v4
+      with:
+        name: wheels-ubuntu-latest
+        path: dist/
+    
+    - uses: actions/download-artifact@v4
+      with:
+        name: sdist
+        path: dist/
+    
+    - name: List distribution files
+      run: ls -lh dist/
+    
+    - name: Verify wheel integrity
+      run: |
+        pip install twine
+        twine check dist/*
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip-existing: true
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-wheels, build-sdist]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: wheels-*
+        merge-multiple: true
+        path: dist/
+    
+    - uses: actions/download-artifact@v4
+      with:
+        name: sdist
+        path: dist/
+    
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Generate release notes
+      id: notes
+      run: |
+        # Extract changelog for this version
+        VERSION=${{ steps.version.outputs.VERSION }}
+        echo "NOTES<<EOF" >> $GITHUB_OUTPUT
+        echo "## Dalla Data Processing v${VERSION}" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "### Installation" >> $GITHUB_OUTPUT
+        echo "\`\`\`bash" >> $GITHUB_OUTPUT
+        echo "pip install dalla-data-processing==${VERSION}" >> $GITHUB_OUTPUT
+        echo "\`\`\`" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "### What's Changed" >> $GITHUB_OUTPUT
+        # TODO: Add actual changelog extraction
+        echo "See CHANGELOG.md for details" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*
+        body: ${{ steps.notes.outputs.NOTES }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Commented out for now - uncomment when ready to publish Docker images
+  # build-docker:
+  #   name: Build and Push Docker Image
+  #   needs: [publish-pypi]
+  #   runs-on: ubuntu-latest
+  #   
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   
+  #   - name: Set up Docker Buildx
+  #     uses: docker/setup-buildx-action@v3
+  #   
+  #   - name: Log in to Docker Hub
+  #     uses: docker/login-action@v3
+  #     with:
+  #       username: ${{ secrets.DOCKER_USERNAME }}
+  #       password: ${{ secrets.DOCKER_PASSWORD }}
+  #   
+  #   - name: Extract version
+  #     id: version
+  #     run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+  #   
+  #   - name: Build and push
+  #     uses: docker/build-push-action@v5
+  #     with:
+  #       context: .
+  #       push: true
+  #       tags: |
+  #         ${{ secrets.DOCKER_USERNAME }}/dalla-data-processing:latest
+  #         ${{ secrets.DOCKER_USERNAME }}/dalla-data-processing:${{ steps.version.outputs.VERSION }}
+  #       cache-from: type=gha
+  #       cache-to: type=gha,mode=max
