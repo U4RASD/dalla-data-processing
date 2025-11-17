@@ -2,6 +2,12 @@
 
 A comprehensive Arabic data processing pipeline with deduplication, stemming, quality checking, and readability scoring, used for the DALLA Models.
 
+## Compatibility
+
+- **Linux**: Fully supported
+- **macOS**: Fully supported
+- **Windows**: Supported through WSL (Windows Subsystem for Linux) only
+
 ## Installation
 
 <b>Using uv</b>

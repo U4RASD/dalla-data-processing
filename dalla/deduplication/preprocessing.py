@@ -4,12 +4,14 @@ Preprocessing utilities for deduplication.
 Handles text normalization and conversion to vertical format for onion.
 """
 
-from dalla.utils.logger import get_logger
 import re
 from pathlib import Path
-from camel_tool 
-from tqdm import tqdm
+
 from camel_tools.utils.dediac import dediac_ar
+from tqdm import tqdm
+
+from dalla.utils.logger import get_logger
+
 logger = get_logger(__name__)
 
 

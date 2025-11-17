@@ -4,16 +4,14 @@ Ranking and binning logic for readability scores.
 Converts raw Flesch and Osman scores into 5-level difficulty rankings.
 """
 
-from typing import List, Tuple
-
 from dalla.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
 def compute_ranks_and_levels(
-    osman_scores: List[float], flesch_scores: List[float]
-) -> Tuple[List[int], List[int], List[int]]:
+    osman_scores: list[float], flesch_scores: list[float]
+) -> tuple[list[int], list[int], list[int]]:
     """
     Compute ranks and final readability levels.
 
@@ -53,12 +51,12 @@ def compute_ranks_and_levels(
     f_bins = bin_ranks(f_ranks)
 
     # Decide final level
-    final_levels = [decide_final_level(ob, fb) for ob, fb in zip(o_bins, f_bins)]
+    final_levels = [decide_final_level(ob, fb) for ob, fb in zip(o_bins, f_bins, strict=True)]
 
     return (o_ranks, f_ranks, final_levels)
 
 
-def bin_ranks(ranks: List[int]) -> List[int]:
+def bin_ranks(ranks: list[int]) -> list[int]:
     """
     Map ranks into 5 bins (0..4) using quantile-based binning.
 
@@ -101,7 +99,7 @@ def bin_ranks(ranks: List[int]) -> List[int]:
     # Assign bins based on position in sorted list
     bins = [0] * n
 
-    for sorted_position, (rank, orig_idx) in enumerate(indexed_ranks):
+    for sorted_position, (_rank, orig_idx) in enumerate(indexed_ranks):
         # Calculate which quintile (0-4) this position falls into
         # Position 0 to n/5-1 → bin 0 (easiest 20%)
         # Position n/5 to 2n/5-1 → bin 1

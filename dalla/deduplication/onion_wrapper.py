@@ -3,10 +3,11 @@ Wrapper for the onion C binary deduplication tool.
 Handles execution of the onion binary and management of temporary files.
 """
 
-from dalla.utils.logger import get_logger
 import shutil
 import subprocess
 from pathlib import Path
+
+from dalla.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

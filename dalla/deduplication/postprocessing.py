@@ -6,10 +6,12 @@ Parses CSV files from onion and extracts duplicate information.
 
 import contextlib
 import csv
-from dalla.utils.logger import get_logger
 from collections import defaultdict
 from pathlib import Path
+
 from tqdm import tqdm
+
+from dalla.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
