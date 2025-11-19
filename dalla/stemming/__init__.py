@@ -548,4 +548,121 @@ def stem_dataset(
     return result
 
 
-__all__ = ["stem_dataset"]
+def stem(
+    text: str | list[str],
+    sep_token: str = "<+>",
+    normalize: bool = False,
+    keep_diacritics: bool = False,
+    model: str = "mle",
+    use_gpu: bool = False,
+) -> str | list[str]:
+    """
+    Stem Arabic text or list of texts.
+
+    Args:
+        text: Single string or list of strings to stem
+        sep_token: Separator token for morphological splits (default: '<+>')
+        normalize: Apply Arabic normalization (default: False)
+        keep_diacritics: Keep diacritics in output (default: False)
+        model: Disambiguator model to use - "mle" or "bert" (default: "mle")
+        use_gpu: Whether to use GPU for BERT model (default: False)
+
+    Returns:
+        Stemmed text in the same format as input (string or list of strings)
+
+    Example:
+        >>> # Stem a single string
+        >>> stemmed = stem("النص العربي")
+        >>> # Returns: "ال<+>نص ال<+>عربي"
+
+        >>> # Stem a list of strings
+        >>> stemmed = stem(["النص العربي", "مثال آخر"])
+        >>> # Returns: ["ال<+>نص ال<+>عربي", "مثال آخر"]
+
+        >>> # Stem with BERT model and GPU
+        >>> stemmed = stem("النص", model="bert", use_gpu=True)
+    """
+    # Validate model parameter
+    model = model.lower()
+    if model not in ["mle", "bert"]:
+        raise ValueError(f"Invalid model '{model}'. Must be 'mle' or 'bert'")
+
+    # Track whether input was a single string
+    is_single_string = isinstance(text, str)
+
+    # Convert single string to list for uniform processing
+    text_list = [text] if is_single_string else text
+
+    # Validate all items are strings
+    if not all(isinstance(t, str) for t in text_list):
+        raise TypeError("All items in text list must be strings")
+
+    # Initialize disambiguator (cached globally if possible)
+    logger.info(f"Initializing {model.upper()} disambiguator...")
+    catalogue = Catalogue.load_catalogue()
+    try:
+        catalogue.download_package("morphology-db-msa-r13")
+        if model == "mle":
+            catalogue.download_package("disambig-mle-calima-msa-r13")
+    except Exception as e:
+        logger.warning(f"Could not verify CAMeL packages: {e}")
+
+    if model == "mle":
+        disambiguator = MLEDisambiguator.pretrained("calima-msa-r13", cache_size=1_000_000)
+    else:  # bert
+        disambiguator = BERTUnfactoredDisambiguator.pretrained(use_gpu=use_gpu)
+
+    # Add caching to disambiguator
+    def new_scored_analysis(self, word_dd):
+        if word_dd in self._cache:
+            return self._cache[word_dd]
+        result = self._scored_analyses(word_dd)
+        self._cache[word_dd] = result
+        return result
+
+    disambiguator._scored_analyses_cached = MethodType(new_scored_analysis, disambiguator)
+    disambiguator._score_fn = disambiguator._scored_analyses_cached
+
+    # Load word lists
+    words_dir = os.path.join(os.path.dirname(__file__), "data")
+    list_al_t = set(read_and_dediacritize(os.path.join(words_dir, "words_al_t.txt")))
+    list_al = set(read_and_dediacritize(os.path.join(words_dir, "words_al.txt")))
+    list_t = set(read_and_dediacritize(os.path.join(words_dir, "words_t.txt")))
+
+    # Process each text
+    results = []
+    for txt in text_list:
+        if not txt:
+            results.append("")
+            continue
+
+        word_list = tokenize(txt)
+        if word_list is None:
+            stemmed = dediac_ar(txt) if not keep_diacritics else txt
+            results.append(stemmed)
+            continue
+
+        tokenized, _, _, has_diacs = morph_tokenize(
+            word_list, disambiguator, list_al_t, list_al, list_t, sep_token=sep_token
+        )
+
+        if tokenized is not None:
+            tokenized = merge_alef_and_alef_lam(tokenized, sep_token)
+            stemmed = "".join(tokenized)
+
+            if normalize:
+                stemmed = normalize_arabic(stemmed)
+
+            if not keep_diacritics:
+                stemmed = dediac_ar(stemmed)
+
+            results.append(stemmed)
+        else:
+            stemmed = dediac_ar(txt) if not keep_diacritics else txt
+            results.append(stemmed)
+
+    # Return in the same format as input
+    return results[0] if is_single_string else results
+
+
+__all__ = ["stem_dataset", "stem"]

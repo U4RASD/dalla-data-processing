@@ -24,4 +24,13 @@ except ImportError:
     _has_tokenize = False
     simple_word_tokenize = None
 
-__all__ = ["DatasetManager", "simple_word_tokenize"]
+try:
+    from dalla.stemming import stem, stem_dataset
+
+    _has_stemming = True
+except ImportError:
+    _has_stemming = False
+    stem = None
+    stem_dataset = None
+
+__all__ = ["DatasetManager", "simple_word_tokenize", "stem", "stem_dataset"]
