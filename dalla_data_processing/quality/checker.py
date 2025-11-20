@@ -15,8 +15,8 @@ from camel_tools.disambig.bert import BERTUnfactoredDisambiguator
 from camel_tools.disambig.mle import MLEDisambiguator
 from datasets import Dataset
 
-from dalla.core.parallel import ParallelProcessor
-from dalla.utils.logger import get_logger
+from dalla_data_processing.core.parallel import ParallelProcessor
+from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

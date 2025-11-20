@@ -6,7 +6,7 @@ For Arabic-specific Osman scoring, we use a simplified formula.
 
 import textstat
 
-from dalla.utils.logger import get_logger
+from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

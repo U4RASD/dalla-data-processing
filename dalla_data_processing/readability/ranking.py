@@ -4,7 +4,7 @@ Ranking and binning logic for readability scores.
 Converts raw Flesch and Osman scores into 5-level difficulty rankings.
 """
 
-from dalla.utils.logger import get_logger
+from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

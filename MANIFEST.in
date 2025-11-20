@@ -1,8 +1,8 @@
 include README.md
 include LICENSE
-recursive-include dalla *.py
-recursive-include dalla/stemming/data *.txt
-recursive-include dalla/deduplication/bin *
-recursive-include dalla/deduplication/onion *.c *.h Makefile*
+recursive-include dalla_data_processing *.py
+recursive-include dalla_data_processing/stemming/data *.txt
+recursive-include dalla_data_processing/deduplication/bin *
+recursive-include dalla_data_processing/deduplication/onion *.c *.h Makefile*
 global-exclude __pycache__
 global-exclude *.py[co]

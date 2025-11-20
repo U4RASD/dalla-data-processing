@@ -11,9 +11,9 @@ from pathlib import Path
 import click
 from datasets import Dataset, DatasetDict
 
-from dalla import __version__
-from dalla.core.dataset import DatasetManager
-from dalla.utils import get_logger, setup_logging
+from dalla_data_processing import __version__
+from dalla_data_processing.core.dataset import DatasetManager
+from dalla_data_processing.utils import get_logger, setup_logging
 
 setup_logging(log_format="console", log_level="INFO")
 logger = get_logger(__name__)
@@ -182,7 +182,7 @@ def deduplicate(
     else:
         click.echo("  Phase 2: OFF (faster, sufficient for most use cases)")
 
-    from dalla.deduplication import deduplicate_dataset
+    from dalla_data_processing.deduplication import deduplicate_dataset
 
     deduplicated = deduplicate_dataset(
         dataset,
@@ -257,7 +257,7 @@ def stem(
     click.echo(f"Stemming {ctx.column} column (workers={ctx.num_workers or 'auto'})")
     click.echo(f"Model: {model.upper()}{' (GPU enabled)' if model == 'bert' and use_gpu else ''}")
 
-    from dalla.stemming import stem_dataset
+    from dalla_data_processing.stemming import stem_dataset
 
     stemmed = stem_dataset(
         dataset,
@@ -311,7 +311,7 @@ def quality_check(ctx: Context, min_score: float, save_errors: bool, model: str,
     click.echo(f"Checking quality of {ctx.column} column")
     click.echo(f"Model: {model.upper()}{' (GPU enabled)' if model == 'bert' and use_gpu else ''}")
 
-    from dalla.quality import check_quality
+    from dalla_data_processing.quality import check_quality
 
     scored = check_quality(
         dataset,
@@ -356,7 +356,7 @@ def readability(ctx: Context, add_ranks: bool):
     if add_ranks:
         click.echo("  Including ranking and difficulty levels (0-4)")
 
-    from dalla.readability import score_readability
+    from dalla_data_processing.readability import score_readability
 
     scored = score_readability(
         dataset,

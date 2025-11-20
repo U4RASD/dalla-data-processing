@@ -2,9 +2,9 @@
 
 from datasets import Dataset
 
-from dalla.readability.ranking import compute_ranks_and_levels
-from dalla.readability.scorer import ReadabilityScorer
-from dalla.utils.logger import get_logger
+from dalla_data_processing.readability.ranking import compute_ranks_and_levels
+from dalla_data_processing.readability.scorer import ReadabilityScorer
+from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -37,7 +37,7 @@ def score_readability(
         Dataset with readability scores and optional rankings
 
     Example:
-        >>> from dalla.readability import score_readability
+        >>> from dalla_data_processing.readability import score_readability
         >>> scored = score_readability(dataset)
         >>> # Columns: flesch_score, osman_score, readability_level, etc.
     """
@@ -54,7 +54,7 @@ def score_readability(
 
     def score_example(example):
         # Create scorer inside worker (for multiprocessing compatibility)
-        from dalla.readability.scorer import ReadabilityScorer
+        from dalla_data_processing.readability.scorer import ReadabilityScorer
 
         worker_scorer = ReadabilityScorer()
 

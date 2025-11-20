@@ -50,7 +50,7 @@ all = [
 ]
 
 [project.scripts]
-dalla-dp = "dalla.cli:main"
+dalla-dp = "dalla_data_processing.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/U4RASD/dalla-data-processing"
@@ -59,18 +59,18 @@ Repository = "https://github.com/U4RASD/dalla-data-processing"
 "Bug Tracker" = "https://github.com/U4RASD/dalla-data-processing/issues"
 
 [tool.setuptools]
-packages = ["dalla", "dalla.core", "dalla.deduplication", "dalla.stemming", "dalla.quality", "dalla.readability", "dalla.utils"]
+packages = ["dalla_data_processing", "dalla_data_processing.core", "dalla_data_processing.deduplication", "dalla_data_processing.stemming", "dalla_data_processing.quality", "dalla_data_processing.readability", "dalla_data_processing.utils"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-dalla = ["py.typed"]
-"dalla.stemming" = ["data/*.txt"]
-"dalla.deduplication" = ["bin/*", "onion/**/*"]
+dalla_data_processing = ["py.typed"]
+"dalla_data_processing.stemming" = ["data/*.txt"]
+"dalla_data_processing.deduplication" = ["bin/*", "onion/**/*"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-src = ["dalla"]
+src = ["dalla_data_processing"]
 
 [tool.ruff.lint]
 select = [
@@ -96,11 +96,11 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.ruff.lint.isort]
-known-first-party = ["dalla"]
+known-first-party = ["dalla_data_processing"]
 
 [tool.ruff.lint.per-file-ignores]
-"dalla/deduplication/onion/**/*.py" = ["N", "SIM", "UP"]  
-"dalla/stemming/__init__.py" = ["N802", "N806", "SIM102"]  
+"dalla_data_processing/deduplication/onion/**/*.py" = ["N", "SIM", "UP"]  
+"dalla_data_processing/stemming/__init__.py" = ["N802", "N806", "SIM102"]  
 
 [tool.uv]
 dev-dependencies = [

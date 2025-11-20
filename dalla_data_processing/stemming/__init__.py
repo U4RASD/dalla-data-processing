@@ -15,8 +15,8 @@ from camel_tools.disambig.mle import MLEDisambiguator
 from camel_tools.utils.dediac import dediac_ar
 from datasets import Dataset
 
-from dalla.utils.logger import get_logger
-from dalla.utils.tokenize import simple_word_tokenize
+from dalla_data_processing.utils.logger import get_logger
+from dalla_data_processing.utils.tokenize import simple_word_tokenize
 
 logger = get_logger(__name__)
 
