@@ -41,7 +41,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact_name }}
-        path: dalla/deduplication/bin/onion-*
+        path: dalla_data_processing/deduplication/bin/onion-*
         if-no-files-found: error
 
   build-wheels:
@@ -62,7 +62,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Create bin directory
-      run: mkdir -p dalla/deduplication/bin
+      run: mkdir -p dalla_data_processing/deduplication/bin
       shell: bash
     
     - name: Download Onion binary
@@ -70,16 +70,16 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.onion_artifact }}
-        path: dalla/deduplication/bin/
+        path: dalla_data_processing/deduplication/bin/
     
     - name: Set binary permissions
       if: matrix.onion_artifact != 'none'
-      run: chmod +x dalla/deduplication/bin/onion-*
+      run: chmod +x dalla_data_processing/deduplication/bin/onion-*
       shell: bash
     
     - name: List binary files
       if: matrix.onion_artifact != 'none'
-      run: ls -lah dalla/deduplication/bin/
+      run: ls -lah dalla_data_processing/deduplication/bin/
       shell: bash
     
     - name: Set up Python
