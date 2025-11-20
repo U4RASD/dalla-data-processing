@@ -80,7 +80,7 @@ dalla-dp -i ./data/raw -o ./data/deduped deduplicate --onion-binary /path/to/oni
 
 ```python
 from datasets import load_from_disk
-from dalla.deduplication import deduplicate_dataset
+from dalla_data_processing.deduplication import deduplicate_dataset
 
 # Load dataset
 dataset = load_from_disk("./data/raw")
@@ -137,7 +137,7 @@ dalla-dp -i ./data/raw -o ./data/stemmed stem --keep-diacritics
 
 ```python
 from datasets import load_from_disk
-from dalla.stemming import stem_dataset
+from dalla_data_processing.stemming import stem_dataset
 
 # Load dataset
 dataset = load_from_disk("./data/raw")
@@ -166,7 +166,7 @@ stemmed.save_to_disk("./data/stemmed")
 **Direct Text Processing**
 
 ```python
-from dalla.stemming import stem
+from dalla_data_processing.stemming import stem
 
 text = "الكتاب الجميل"
 result = stem(text)
@@ -210,7 +210,7 @@ dalla-dp -i ./data/raw -o ./data/quality -c content quality-check
 
 ```python
 from datasets import load_from_disk
-from dalla.quality import check_quality
+from dalla_data_processing.quality import check_quality
 
 dataset = load_from_disk("./data/raw")
 
@@ -258,7 +258,7 @@ dalla-dp -i ./data/raw -o ./data/scored -c content readability
 
 ```python
 from datasets import load_from_disk
-from dalla.readability import score_readability
+from dalla_data_processing.readability import score_readability
 
 # Load dataset
 dataset = load_from_disk("./data/raw")
@@ -298,7 +298,7 @@ dalla-dp info ./data/my_dataset
 **Python API**
 
 ```python
-from dalla.core.dataset import DatasetManager
+from dalla_data_processing.core.dataset import DatasetManager
 
 dm = DatasetManager()
 
@@ -330,7 +330,7 @@ splits = dm.train_test_split(dataset, test_size=0.2, seed=42)
 
 ```python
 from datasets import DatasetDict, load_from_disk
-from dalla.quality import check_quality
+from dalla_data_processing.quality import check_quality
 
 dataset_dict = load_from_disk("./data/my_dataset")
 
@@ -349,7 +349,7 @@ train_processed = check_quality(dataset_dict['train'], min_score=60.0)
 The onion deduplication tool needs to be compiled for your system:
 
 ```bash
-cd dalla/deduplication/onion/src_sc
+cd dalla_data_processing/deduplication/onion/src_sc
 
 # Compile
 make -f Makefile.g

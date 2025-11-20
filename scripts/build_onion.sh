@@ -15,8 +15,8 @@ echo -e "${GREEN}=== Building Onion Binary ===${NC}"
 # Get script directory and project root
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-ONION_SOURCE="$PROJECT_ROOT/dalla/deduplication/onion/src_sc"
-OUTPUT_DIR="$PROJECT_ROOT/dalla/deduplication/bin"
+ONION_SOURCE="$PROJECT_ROOT/dalla_data_processing/deduplication/onion/src_sc"
+OUTPUT_DIR="$PROJECT_ROOT/dalla_data_processing/deduplication/bin"
 
 # Check if source exists
 if [ ! -d "$ONION_SOURCE" ]; then

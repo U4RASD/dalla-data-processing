@@ -13,10 +13,10 @@ from pathlib import Path
 from datasets import Dataset
 from tqdm import tqdm
 
-from dalla.deduplication.onion_wrapper import find_onion_binary, run_onion
-from dalla.deduplication.postprocessing import extract_duplicates_from_csvs
-from dalla.deduplication.preprocessing import create_file_list, create_vert_files
-from dalla.utils.logger import get_logger
+from dalla_data_processing.deduplication.onion_wrapper import find_onion_binary, run_onion
+from dalla_data_processing.deduplication.postprocessing import extract_duplicates_from_csvs
+from dalla_data_processing.deduplication.preprocessing import create_file_list, create_vert_files
+from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
