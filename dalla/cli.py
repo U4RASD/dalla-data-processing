@@ -36,7 +36,9 @@ class Context:
 pass_context = click.make_pass_decorator(Context, ensure=True)
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"], "allow_interspersed_args": True}
+)
 @click.version_option(version=__version__, prog_name="dalla-process")
 @click.option(
     "--input-dataset",

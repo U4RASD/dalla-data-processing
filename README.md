@@ -133,6 +133,8 @@ dalla-dp -i ./data/raw -o ./data/stemmed stem --keep-diacritics
 
 **Python API**
 
+**Dataset Processing**
+
 ```python
 from datasets import load_from_disk
 from dalla.stemming import stem_dataset
@@ -159,6 +161,19 @@ stemmed = stem_dataset(
 )
 
 stemmed.save_to_disk("./data/stemmed")
+```
+
+**Direct Text Processing**
+
+```python
+from dalla.stemming import stem
+
+text = "الكتاب الجميل"
+result = stem(text)
+
+texts = ["المدرسة الجديدة", "الطالب المجتهد"]
+results = stem(texts)
+
 ```
 
 ### Quality Checking
