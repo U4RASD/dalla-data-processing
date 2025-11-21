@@ -2,6 +2,15 @@
 
 Check text quality using morphological analysis to detect errors and foreign words.
 
+## Installation
+
+This feature requires the `[quality]` extra:
+
+```bash
+pip install "dalla-data-processing[quality]"
+# or install all features: pip install "dalla-data-processing[all]"
+```
+
 ## CLI Usage
 
 **Command:** `dalla-dp quality-check [OPTIONS]`

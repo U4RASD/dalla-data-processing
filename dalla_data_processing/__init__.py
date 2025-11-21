@@ -10,29 +10,38 @@ A comprehensive toolkit for processing Arabic text data with support for:
 
 __version__ = "0.0.1"
 
-try:
-    from dalla_data_processing.core.dataset import DatasetManager
 
-    _has_dataset = True
-except ImportError:
-    _has_dataset = False
-    DatasetManager = None
+# Lazy imports - only import when actually used, not at package load time
+def __getattr__(name):
+    """Lazy load heavy modules only when accessed."""
+    if name == "DatasetManager":
+        from dalla_data_processing.core.dataset import DatasetManager
 
-try:
-    from dalla_data_processing.utils.tokenize import simple_word_tokenize
+        return DatasetManager
+    elif name == "simple_word_tokenize":
+        from dalla_data_processing.utils.tokenize import simple_word_tokenize
 
-    _has_tokenize = True
-except ImportError:
-    _has_tokenize = False
-    simple_word_tokenize = None
+        return simple_word_tokenize
+    elif name == "stem":
+        from dalla_data_processing.stemming import stem
 
-try:
-    from dalla_data_processing.stemming import stem, stem_dataset
+        return stem
+    elif name == "stem_dataset":
+        from dalla_data_processing.stemming import stem_dataset
 
-    _has_stemming = True
-except ImportError:
-    _has_stemming = False
-    stem = None
-    stem_dataset = None
+        return stem_dataset
+    elif name == "DatasetPacker":
+        from dalla_data_processing.packing import DatasetPacker
 
-__all__ = ["DatasetManager", "simple_word_tokenize", "stem", "stem_dataset", "__version__"]
+        return DatasetPacker
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
+__all__ = [
+    "DatasetManager",
+    "simple_word_tokenize",
+    "stem",
+    "stem_dataset",
+    "DatasetPacker",
+    "__version__",
+]

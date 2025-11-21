@@ -2,6 +2,15 @@
 
 Apply morphological analysis and stemming using CAMeL Tools.
 
+## Installation
+
+This feature requires the `[stem]` extra:
+
+```bash
+pip install "dalla-data-processing[stem]"
+# or install all features: pip install "dalla-data-processing[all]"
+```
+
 ## CLI Usage
 
 **Command:** `dalla-dp stem [OPTIONS]`

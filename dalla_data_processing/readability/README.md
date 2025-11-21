@@ -2,6 +2,15 @@
 
 Calculate readability scores using Flesch Reading Ease and Osman methods.
 
+## Installation
+
+This feature requires the `[readability]` extra:
+
+```bash
+pip install "dalla-data-processing[readability]"
+# or install all features: pip install "dalla-data-processing[all]"
+```
+
 ## CLI Usage
 
 **Command:** `dalla-dp readability [OPTIONS]`

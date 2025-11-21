@@ -2,6 +2,15 @@
 
 Detect and remove duplicate or near-duplicate documents from your datasets using the Onion algorithm.
 
+## Installation
+
+This feature requires the `[dedup]` extra:
+
+```bash
+pip install "dalla-data-processing[dedup]"
+# or install all features: pip install "dalla-data-processing[all]"
+```
+
 ## CLI Usage
 
 **Command:** `dalla-dp deduplicate [OPTIONS]`

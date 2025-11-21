@@ -25,13 +25,9 @@ classifiers = [
 dependencies = [
     "datasets>=2.14.0",
     "transformers>=4.30.0",
-    "camel-tools>=1.5.0",
     "click>=8.0.0",
     "tqdm>=4.65.0",
-    "pandas>=2.0.0",
-    "numpy>=1.24.0",
     "pyarrow>=12.0.0",
-    "textstat>=0.7.0",
     "structlog>=24.0.0",
 ]
 
@@ -42,11 +38,28 @@ dev = [
     "ruff>=0.1.0",
     "pre-commit>=3.0.0",
 ]
+dedup = [
+    "camel-tools>=1.5.0",
+]
 dedup-native = [
     "cffi>=1.15.0",
 ]
+stem = [
+    "camel-tools>=1.5.0",
+]
+quality = [
+    "camel-tools>=1.5.0",
+]
+readability = [
+    "textstat>=0.7.0",
+]
+pack = [
+    "sentencepiece>=0.2.0",
+    "rbpe",
+    "pyyaml",
+]
 all = [
-    "dalla-data-processing[dev,dedup-native]",
+    "dalla-data-processing[dev,dedup,dedup-native,stem,quality,readability,pack]",
 ]
 
 [project.scripts]
@@ -59,7 +72,7 @@ Repository = "https://github.com/U4RASD/dalla-data-processing"
 "Bug Tracker" = "https://github.com/U4RASD/dalla-data-processing/issues"
 
 [tool.setuptools]
-packages = ["dalla_data_processing", "dalla_data_processing.core", "dalla_data_processing.deduplication", "dalla_data_processing.stemming", "dalla_data_processing.quality", "dalla_data_processing.readability", "dalla_data_processing.utils"]
+packages = ["dalla_data_processing", "dalla_data_processing.core", "dalla_data_processing.deduplication", "dalla_data_processing.packing", "dalla_data_processing.stemming", "dalla_data_processing.quality", "dalla_data_processing.readability", "dalla_data_processing.utils"]
 include-package-data = true
 
 [tool.setuptools.package-data]
@@ -102,8 +115,8 @@ known-first-party = ["dalla_data_processing"]
 "dalla_data_processing/deduplication/onion/**/*.py" = ["N", "SIM", "UP"]  
 "dalla_data_processing/stemming/__init__.py" = ["N802", "N806", "SIM102"]  
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
