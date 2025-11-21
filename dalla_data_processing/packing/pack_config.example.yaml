@@ -1,0 +1,11 @@
+tokenizer_path: "/path/to/tokenizer"
+max_seq_length: 2048
+chunk_size_gb: 2.0
+rbpe: false
+sft: false
+
+# text_column: "content"
+
+subset_order:
+  - "train"
+  - "validation"

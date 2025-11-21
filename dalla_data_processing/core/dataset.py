@@ -1,8 +1,5 @@
 """
 Dataset I/O utilities for unified HuggingFace dataset handling.
-
-This module provides a consistent interface for loading, saving, and manipulating
-HuggingFace datasets across all dalla-process components.
 """
 
 from collections.abc import Callable

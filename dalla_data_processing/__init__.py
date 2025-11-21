@@ -8,31 +8,49 @@ A comprehensive toolkit for processing Arabic text data with support for:
 - Readability scoring
 """
 
-__version__ = "0.0.1"
-
 try:
-    from dalla_data_processing.core.dataset import DatasetManager
-
-    _has_dataset = True
+    from dalla_data_processing._version import version as __version__
 except ImportError:
-    _has_dataset = False
-    DatasetManager = None
+    # Fallback for development without installation
+    try:
+        from importlib.metadata import PackageNotFoundError, version
 
-try:
-    from dalla_data_processing.utils.tokenize import simple_word_tokenize
+        __version__ = version("dalla-data-processing")
+    except PackageNotFoundError:
+        __version__ = "0.0.0+unknown"
 
-    _has_tokenize = True
-except ImportError:
-    _has_tokenize = False
-    simple_word_tokenize = None
 
-try:
-    from dalla_data_processing.stemming import stem, stem_dataset
+# Lazy imports - only import when actually used, not at package load time
+def __getattr__(name):
+    """Lazy load heavy modules only when accessed."""
+    if name == "DatasetManager":
+        from dalla_data_processing.core.dataset import DatasetManager
 
-    _has_stemming = True
-except ImportError:
-    _has_stemming = False
-    stem = None
-    stem_dataset = None
+        return DatasetManager
+    elif name == "simple_word_tokenize":
+        from dalla_data_processing.utils.tokenize import simple_word_tokenize
 
-__all__ = ["DatasetManager", "simple_word_tokenize", "stem", "stem_dataset", "__version__"]
+        return simple_word_tokenize
+    elif name == "stem":
+        from dalla_data_processing.stemming import stem
+
+        return stem
+    elif name == "stem_dataset":
+        from dalla_data_processing.stemming import stem_dataset
+
+        return stem_dataset
+    elif name == "DatasetPacker":
+        from dalla_data_processing.packing import DatasetPacker
+
+        return DatasetPacker
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
+__all__ = [
+    "DatasetManager",
+    "simple_word_tokenize",
+    "stem",
+    "stem_dataset",
+    "DatasetPacker",
+    "__version__",
+]
