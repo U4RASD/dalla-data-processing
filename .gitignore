@@ -20,6 +20,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# setuptools-scm version file
+dalla_data_processing/_version.py
+
 # Virtual environments
 venv/
 env/

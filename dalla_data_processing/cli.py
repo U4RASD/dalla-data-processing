@@ -1,5 +1,5 @@
 """
-Main CLI entry point for dalla-process.
+Main CLI entry point for dalla-data-processing (dalla-dp).
 
 This module provides the unified command-line interface for all
 Arabic data processing operations.
@@ -11,13 +11,12 @@ from typing import TYPE_CHECKING
 
 import click
 
+from dalla_data_processing import __version__
 from dalla_data_processing.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from datasets import Dataset, DatasetDict
     from dalla_data_processing.core.dataset import DatasetManager
-
-__version__ = "0.0.1"
 
 logger = get_logger("dalla.cli")
 
@@ -129,7 +128,7 @@ def _setup_context_and_logging(
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
-@click.version_option(version=__version__, prog_name="dalla-process")
+@click.version_option(version=__version__, prog_name="dalla-data-processing")
 @click.option(
     "--input-dataset",
     "-i",

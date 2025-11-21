@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "dalla-data-processing"
-version = "0.0.1"
+dynamic = ["version"]
 description = "data processing pipeline with deduplication, stemming, quality checking, and readability scoring, used for the DALLA Models"
 authors = [
     {name = "Hadi Hamoud", email = "hhamoud@dohainstitute.edu.qa"},
@@ -114,6 +114,9 @@ known-first-party = ["dalla_data_processing"]
 [tool.ruff.lint.per-file-ignores]
 "dalla_data_processing/deduplication/onion/**/*.py" = ["N", "SIM", "UP"]  
 "dalla_data_processing/stemming/__init__.py" = ["N802", "N806", "SIM102"]  
+
+[tool.setuptools_scm]
+version_file = "dalla_data_processing/_version.py"
 
 [dependency-groups]
 dev = [

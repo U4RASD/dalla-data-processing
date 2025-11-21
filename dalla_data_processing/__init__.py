@@ -8,7 +8,16 @@ A comprehensive toolkit for processing Arabic text data with support for:
 - Readability scoring
 """
 
-__version__ = "0.0.1"
+try:
+    from dalla_data_processing._version import version as __version__
+except ImportError:
+    # Fallback for development without installation
+    try:
+        from importlib.metadata import version, PackageNotFoundError
+
+        __version__ = version("dalla-data-processing")
+    except PackageNotFoundError:
+        __version__ = "0.0.0+unknown"
 
 
 # Lazy imports - only import when actually used, not at package load time
