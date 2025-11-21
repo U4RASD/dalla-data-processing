@@ -1,9 +1,11 @@
-from datasets import concatenate_datasets, load_from_disk, Dataset, DatasetDict
-from multiprocessing import Pool, cpu_count
-import os
-from tqdm import tqdm
-import shutil
+import contextlib
 import math
+import os
+import shutil
+from multiprocessing import Pool, cpu_count
+
+from datasets import Dataset, DatasetDict, concatenate_datasets, load_from_disk
+from tqdm import tqdm
 
 from dalla_data_processing.utils.logger import get_logger
 
@@ -12,16 +14,13 @@ logger = get_logger(__name__)
 
 def get_directory_size(path):
     total_size = 0
-    for dirpath, dirnames, filenames in os.walk(path):
+    for dirpath, _dirnames, filenames in os.walk(path):
         for filename in filenames:
             filepath = os.path.join(dirpath, filename)
             # Skip if it's a symbolic link
             if not os.path.islink(filepath):
-                try:
+                with contextlib.suppress(OSError):
                     total_size += os.path.getsize(filepath)
-                except OSError:
-                    # Handle permission errors or files that disappeared
-                    pass
     return total_size
 
 
@@ -83,7 +82,7 @@ class DatasetPacker:
         if os.path.isfile(os.path.join(base_path, "dataset_info.json")):
             # Direct dataset path
             size_bytes = 0
-            for root, dirs, files in os.walk(base_path):
+            for root, _dirs, files in os.walk(base_path):
                 for file in files:
                     file_path = os.path.join(root, file)
                     size_bytes += os.path.getsize(file_path)
@@ -97,7 +96,7 @@ class DatasetPacker:
                     logger.warning("Directory not found", directory=dir_name, base_path=base_path)
                     continue
                 size_bytes = 0
-                for root, dirs, files in os.walk(path):
+                for root, _dirs, files in os.walk(path):
                     for file in files:
                         file_path = os.path.join(root, file)
                         size_bytes += os.path.getsize(file_path)
@@ -261,10 +260,12 @@ class DatasetPacker:
         else:
             logger.debug("Assistant masks not all zeros")
             new_labels = []
-            for assistant_mask, input_id in zip(all_assistant_masks, all_input_ids):
+            for assistant_mask, input_id in zip(all_assistant_masks, all_input_ids, strict=True):
                 # new_labels.append([-100 * i*j for i, j in zip(assistant_mask, input_id)])
                 # if i in attention_mask is 0, then have -100, otherwise have input_id
-                new_labels.append([-100 if i == 0 else j for i, j in zip(assistant_mask, input_id)])
+                new_labels.append(
+                    [-100 if i == 0 else j for i, j in zip(assistant_mask, input_id, strict=True)]
+                )
 
             tokenized_dataset = Dataset.from_dict(
                 {"input_ids": all_input_ids, "labels": new_labels}

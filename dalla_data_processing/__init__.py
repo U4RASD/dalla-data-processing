@@ -13,7 +13,7 @@ try:
 except ImportError:
     # Fallback for development without installation
     try:
-        from importlib.metadata import version, PackageNotFoundError
+        from importlib.metadata import PackageNotFoundError, version
 
         __version__ = version("dalla-data-processing")
     except PackageNotFoundError:

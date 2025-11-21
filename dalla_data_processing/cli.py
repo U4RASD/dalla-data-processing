@@ -15,8 +15,8 @@ from dalla_data_processing import __version__
 from dalla_data_processing.utils.logger import get_logger
 
 if TYPE_CHECKING:
-    from datasets import Dataset, DatasetDict
-    from dalla_data_processing.core.dataset import DatasetManager
+    from datasets import Dataset
+
 
 logger = get_logger("dalla.cli")
 
@@ -31,7 +31,7 @@ class Context:
         self.num_workers: int | None = None
         self.verbose: bool = False
         self.overwrite: bool = False
-        self.dataset: "Dataset | None" = None
+        self.dataset: Dataset | None = None
         self._dataset_manager = None
 
     @property
@@ -277,7 +277,7 @@ def deduplicate(
 
     try:
         from dalla_data_processing.deduplication import deduplicate_dataset
-    except ImportError as e:
+    except ImportError:
         logger.error("Missing dependencies for deduplication")
         logger.error("Install with: pip install 'dalla-data-processing[dedup]'")
         sys.exit(1)
@@ -375,7 +375,7 @@ def stem(
 
     try:
         from dalla_data_processing.stemming import stem_dataset
-    except ImportError as e:
+    except ImportError:
         logger.error("Missing dependencies for stemming")
         logger.error("Install with: pip install 'dalla-data-processing[stem]'")
         sys.exit(1)
@@ -451,7 +451,7 @@ def quality_check(
 
     try:
         from dalla_data_processing.quality import check_quality
-    except ImportError as e:
+    except ImportError:
         logger.error("Missing dependencies for quality checking")
         logger.error("Install with: pip install 'dalla-data-processing[quality]'")
         sys.exit(1)
@@ -517,7 +517,7 @@ def readability(
 
     try:
         from dalla_data_processing.readability import score_readability
-    except ImportError as e:
+    except ImportError:
         logger.error("Missing dependencies for readability scoring")
         logger.error("Install with: pip install 'dalla-data-processing[readability]'")
         sys.exit(1)
@@ -622,7 +622,7 @@ def pack(
 
     config_data = {}
     if config:
-        with open(config, "r") as f:
+        with open(config) as f:
             config_data = yaml.safe_load(f) or {}
 
     if tokenizer_path:
@@ -666,7 +666,7 @@ def pack(
     if "text_column" not in config_data:
         config_data["text_column"] = "messages" if config_data.get("sft", False) else "text"
 
-    logger.info(f"Starting dataset processing")
+    logger.info("Starting dataset processing")
     logger.info(f"Input path: {ctx.input_dataset}")
     logger.info(f"Output directory: {ctx.output_dataset}")
     logger.info(f"Using RBPE tokenizer: {config_data.get('rbpe', False)}")
