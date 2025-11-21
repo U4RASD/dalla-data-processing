@@ -11,6 +11,7 @@ from concurrent.futures import TimeoutError as FutureTimeoutError
 from types import MethodType
 from typing import Any
 
+from camel_tools.data.catalogue import Catalogue
 from camel_tools.disambig.bert import BERTUnfactoredDisambiguator
 from camel_tools.disambig.mle import MLEDisambiguator
 from datasets import Dataset
@@ -53,6 +54,25 @@ class QualityChecker:
 
     def _init_disambiguator(self):
         """Initialize and configure the disambiguator with caching."""
+        # Install required CAMeL Tools packages based on model type
+        logger.info("Checking CAMeL Tools data packages...")
+        catalogue = Catalogue.load_catalogue()
+
+        try:
+            catalogue.download_package("morphology-db-msa-r13")
+            catalogue.download_package("disambig-mle-calima-msa-r13")
+            logger.info("msa-r13 packages installed")
+        except Exception as e:
+            logger.warning(f"Package installation warning: {e}")
+
+        # Install BERT package if using BERT model
+        if self.model == "bert":
+            try:
+                catalogue.download_package("disambig-bert-unfactored-all")
+                logger.info("BERT package installed")
+            except Exception as e:
+                logger.warning(f"BERT package installation warning: {e}")
+
         if self.model == "mle":
             self.disambiguator = MLEDisambiguator.pretrained()
             logger.info("MLE disambiguator loaded")

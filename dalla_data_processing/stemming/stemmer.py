@@ -473,12 +473,19 @@ def stem_dataset(
     catalogue = Catalogue.load_catalogue()
     try:
         catalogue.download_package("morphology-db-msa-r13")
-        if model == "mle":
-            catalogue.download_package("disambig-mle-calima-msa-r13")
-        # For BERT, let it download automatically when pretrained() is called
-        logger.info("CAMeL Tools data packages ready")
+        catalogue.download_package("disambig-mle-calima-msa-r13")
+        logger.info("msa-r13 packages installed")
     except Exception as e:
-        logger.warning(f"Could not verify CAMeL packages: {e}")
+        logger.warning(f"Package installation warning: {e}")
+
+    if model == "bert":
+        try:
+            catalogue.download_package("disambig-bert-unfactored-all")
+            logger.info("BERT package installed")
+        except Exception as e:
+            logger.warning(f"BERT package installation warning: {e}")
+
+    logger.info("CAMeL Tools data packages ready")
 
     logger.info("Loading additional words lists...")
     words_dir = os.path.join(os.path.dirname(__file__), "data")
@@ -597,15 +604,21 @@ def stem(
     if not all(isinstance(t, str) for t in text_list):
         raise TypeError("All items in text list must be strings")
 
-    # Initialize disambiguator (cached globally if possible)
     logger.info(f"Initializing {model.upper()} disambiguator...")
     catalogue = Catalogue.load_catalogue()
     try:
         catalogue.download_package("morphology-db-msa-r13")
-        if model == "mle":
-            catalogue.download_package("disambig-mle-calima-msa-r13")
+        catalogue.download_package("disambig-mle-calima-msa-r13")
+        logger.info("msa-r13 packages installed")
     except Exception as e:
-        logger.warning(f"Could not verify CAMeL packages: {e}")
+        logger.warning(f"Package installation warning: {e}")
+
+    if model == "bert":
+        try:
+            catalogue.download_package("disambig-bert-unfactored-all")
+            logger.info("BERT package installed")
+        except Exception as e:
+            logger.warning(f"BERT package installation warning: {e}")
 
     if model == "mle":
         disambiguator = MLEDisambiguator.pretrained("calima-msa-r13", cache_size=1_000_000)
