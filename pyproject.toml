@@ -11,7 +11,7 @@ authors = [
     {name = "Digital Research Unit - Arab Center", email = "dru@dohainstitute.edu.qa"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 keywords = ["arabic", "nlp", "data-processing", "deduplication", "stemming", "readability", "quality"]
 classifiers = [
     "Intended Audience :: Developers",
@@ -39,23 +39,24 @@ dev = [
     "pre-commit>=3.0.0",
 ]
 dedup = [
-    "camel-tools>=1.5.0",
+    "camel-tools==1.5.7",
 ]
 dedup-native = [
     "cffi>=1.15.0",
 ]
 stem = [
-    "camel-tools>=1.5.0",
+    "camel-tools==1.5.7",
 ]
 quality = [
-    "camel-tools>=1.5.0",
+    "camel-tools==1.5.7",
 ]
 readability = [
     "textstat>=0.7.0",
 ]
 pack = [
     "sentencepiece>=0.2.0",
-    "rbpe",
+    # "rbpe",  # excluded due to transformers version conflict with camel-tools
+                # users should install separately if needed: pip install rbpe
     "pyyaml",
 ]
 all = [

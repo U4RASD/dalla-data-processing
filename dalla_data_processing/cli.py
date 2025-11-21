@@ -651,7 +651,15 @@ def pack(
             tokenizer = RBPETokenizer.from_pretrained(config_data["tokenizer_path"])
         except ImportError:
             logger.error("Missing rbpe package")
-            logger.error("Install with: pip install rbpe")
+            logger.error(
+                "rbpe is not included in the default installation due to "
+                "dependency conflicts with camel-tools (transformers version requirements)"
+            )
+            logger.error("Install separately with: pip install rbpe")
+            logger.error(
+                "Note: Installing rbpe may require a separate environment "
+                "if you also use dedup/stem/quality features"
+            )
             sys.exit(1)
     else:
         try:
