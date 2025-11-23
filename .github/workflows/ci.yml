@@ -55,8 +55,10 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: onion-linux-x86_64
-          - os: macos-latest
+          - os: macos-13
             artifact_name: onion-darwin-x86_64
+          - os: macos-14
+            artifact_name: onion-darwin-arm64
     
     steps:
     - uses: actions/checkout@v4
