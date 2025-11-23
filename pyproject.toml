@@ -79,6 +79,8 @@ Repository = "https://github.com/U4RASD/dalla-data-processing"
 packages = ["dalla_data_processing", "dalla_data_processing.core", "dalla_data_processing.deduplication", "dalla_data_processing.packing", "dalla_data_processing.stemming", "dalla_data_processing.quality", "dalla_data_processing.readability", "dalla_data_processing.utils"]
 include-package-data = true
 
+zip-safe = false
+
 [tool.setuptools.package-data]
 dalla_data_processing = ["py.typed"]
 "dalla_data_processing.stemming" = ["data/*.txt"]

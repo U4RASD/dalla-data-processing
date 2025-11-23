@@ -48,21 +48,10 @@ jobs:
         path: dalla_data_processing/deduplication/bin/onion-*
         if-no-files-found: error
 
-  build-wheels:
-    name: Build wheels on ${{ matrix.os }}
+  build-wheel:
+    name: Build universal wheel with all platform binaries
     needs: build-onion
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            onion_artifact: onion-linux-x86_64
-          - os: macos-13
-            onion_artifact: onion-darwin-x86_64
-          - os: macos-14
-            onion_artifact: onion-darwin-arm64
-          - os: windows-latest
-            onion_artifact: none
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
@@ -71,24 +60,30 @@ jobs:
     
     - name: Create bin directory
       run: mkdir -p dalla_data_processing/deduplication/bin
-      shell: bash
     
-    - name: Download Onion binary
-      if: matrix.onion_artifact != 'none'
+    - name: Download Linux binary
       uses: actions/download-artifact@v4
       with:
-        name: ${{ matrix.onion_artifact }}
+        name: onion-linux-x86_64
+        path: dalla_data_processing/deduplication/bin/
+    
+    - name: Download macOS Intel binary
+      uses: actions/download-artifact@v4
+      with:
+        name: onion-darwin-x86_64
+        path: dalla_data_processing/deduplication/bin/
+    
+    - name: Download macOS ARM binary
+      uses: actions/download-artifact@v4
+      with:
+        name: onion-darwin-arm64
         path: dalla_data_processing/deduplication/bin/
     
     - name: Set binary permissions
-      if: matrix.onion_artifact != 'none'
       run: chmod +x dalla_data_processing/deduplication/bin/onion-*
-      shell: bash
     
-    - name: List binary files
-      if: matrix.onion_artifact != 'none'
+    - name: List all binaries
       run: ls -lah dalla_data_processing/deduplication/bin/
-      shell: bash
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -105,13 +100,16 @@ jobs:
     
     - name: List wheel contents
       run: |
-        python -m zipfile -l dist/*.whl | head -50
+        echo "=== Wheel contents (binaries) ==="
+        python -m zipfile -l dist/*.whl | grep onion-
+        echo "=== Wheel info ==="
+        ls -lh dist/
     
-    - name: Upload wheels
+    - name: Upload wheel
       uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.os }}
-        path: dist/*
+        name: wheel
+        path: dist/*.whl
 
   build-sdist:
     name: Build source distribution
@@ -140,16 +138,15 @@ jobs:
 
   publish-pypi:
     name: Publish to PyPI
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheel, build-sdist]
     runs-on: ubuntu-latest
     environment: release
     
     steps:
-    # Download all platform-specific wheels
+    # Download the universal wheel with all platform binaries
     - uses: actions/download-artifact@v4
       with:
-        pattern: wheels-*
-        merge-multiple: true
+        name: wheel
         path: dist/
     
     - uses: actions/download-artifact@v4
@@ -173,7 +170,7 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheel, build-sdist]
     runs-on: ubuntu-latest
     
     steps:
@@ -183,8 +180,7 @@ jobs:
     
     - uses: actions/download-artifact@v4
       with:
-        pattern: wheels-*
-        merge-multiple: true
+        name: wheel
         path: dist/
     
     - uses: actions/download-artifact@v4
