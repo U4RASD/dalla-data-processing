@@ -63,14 +63,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # On macOS, add Homebrew paths for sparsehash
     if command -v brew &> /dev/null; then
         BREW_PREFIX=$(brew --prefix)
-        EXTRA_CFLAGS="-I${BREW_PREFIX}/include"
+        SPARSEHASH_PREFIX=$(brew --prefix google-sparsehash 2>/dev/null || echo "${BREW_PREFIX}")
+        EXTRA_CFLAGS="-I${SPARSEHASH_PREFIX}/include"
         echo -e "${YELLOW}Using Homebrew prefix: ${BREW_PREFIX}${NC}"
+        echo -e "${YELLOW}Using sparsehash include: ${SPARSEHASH_PREFIX}/include${NC}"
     fi
 fi
 
 # Build onion
 echo -e "${YELLOW}Compiling Onion...${NC}"
-if make CFLAGS="-Wall -O3 ${EXTRA_CFLAGS}"; then
+if make CFLAGS="-Wall -O3 -std=c++11 ${EXTRA_CFLAGS}"; then
     echo -e "${GREEN}✓ Compilation successful${NC}"
 else
     echo -e "${RED}✗ Compilation failed${NC}"

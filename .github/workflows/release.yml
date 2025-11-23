@@ -17,8 +17,10 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: onion-linux-x86_64
-          - os: macos-latest
+          - os: macos-13
             artifact_name: onion-darwin-x86_64
+          - os: macos-14
+            artifact_name: onion-darwin-arm64
     
     steps:
     - uses: actions/checkout@v4
@@ -55,8 +57,10 @@ jobs:
         include:
           - os: ubuntu-latest
             onion_artifact: onion-linux-x86_64
-          - os: macos-latest
+          - os: macos-13
             onion_artifact: onion-darwin-x86_64
+          - os: macos-14
+            onion_artifact: onion-darwin-arm64
           - os: windows-latest
             onion_artifact: none
     
@@ -141,10 +145,11 @@ jobs:
     environment: release
     
     steps:
-    # Only use Linux wheel to avoid conflicts
+    # Download all platform-specific wheels
     - uses: actions/download-artifact@v4
       with:
-        name: wheels-ubuntu-latest
+        pattern: wheels-*
+        merge-multiple: true
         path: dist/
     
     - uses: actions/download-artifact@v4

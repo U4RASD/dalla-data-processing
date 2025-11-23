@@ -11,13 +11,16 @@ authors = [
     {name = "Digital Research Unit - Arab Center", email = "dru@dohainstitute.edu.qa"}
 ]
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.10"
 keywords = ["arabic", "nlp", "data-processing", "deduplication", "stemming", "readability", "quality"]
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Text Processing :: Linguistic",
 ]
@@ -83,7 +86,7 @@ dalla_data_processing = ["py.typed"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py310"
 src = ["dalla_data_processing"]
 
 [tool.ruff.lint]

@@ -2,7 +2,7 @@ include ../Makefile.config
 
 CC=g++
 #CFLAGS=-Wall -O3
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -std=c++11 -I/opt/homebrew/opt/google-sparsehash/include
 
 OBJS=version.o buzhash.o
 TARGETS=hashgen hashdup onion
