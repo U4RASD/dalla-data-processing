@@ -17,10 +17,8 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: onion-linux-x86_64
-          - os: macos-13
-            artifact_name: onion-darwin-x86_64
           - os: macos-14
-            artifact_name: onion-darwin-arm64
+            artifact_name: onion-darwin-universal
     
     steps:
     - uses: actions/checkout@v4
@@ -67,16 +65,10 @@ jobs:
         name: onion-linux-x86_64
         path: dalla_data_processing/deduplication/bin/
     
-    - name: Download macOS Intel binary
+    - name: Download macOS universal binary
       uses: actions/download-artifact@v4
       with:
-        name: onion-darwin-x86_64
-        path: dalla_data_processing/deduplication/bin/
-    
-    - name: Download macOS ARM binary
-      uses: actions/download-artifact@v4
-      with:
-        name: onion-darwin-arm64
+        name: onion-darwin-universal
         path: dalla_data_processing/deduplication/bin/
     
     - name: Set binary permissions

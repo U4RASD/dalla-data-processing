@@ -59,6 +59,7 @@ make clean 2>/dev/null || true
 
 # Set up compiler flags for macOS
 EXTRA_CFLAGS=""
+EXTRA_LDFLAGS=""
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # On macOS, add Homebrew paths for sparsehash
     if command -v brew &> /dev/null; then
@@ -68,11 +69,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         echo -e "${YELLOW}Using Homebrew prefix: ${BREW_PREFIX}${NC}"
         echo -e "${YELLOW}Using sparsehash include: ${SPARSEHASH_PREFIX}/include${NC}"
     fi
+    
+    # Build universal binary for macOS (x86_64 + arm64)
+    EXTRA_CFLAGS="${EXTRA_CFLAGS} -arch x86_64 -arch arm64"
+    EXTRA_LDFLAGS="-arch x86_64 -arch arm64"
+    echo -e "${YELLOW}Building universal binary (x86_64 + arm64)${NC}"
 fi
 
 # Build onion
 echo -e "${YELLOW}Compiling Onion...${NC}"
-if make CFLAGS="-Wall -O3 -std=c++11 ${EXTRA_CFLAGS}"; then
+if make CFLAGS="-Wall -O3 -std=c++11 ${EXTRA_CFLAGS}" LDFLAGS="${EXTRA_LDFLAGS}"; then
     echo -e "${GREEN}✓ Compilation successful${NC}"
 else
     echo -e "${RED}✗ Compilation failed${NC}"
@@ -88,6 +94,12 @@ fi
 # Get platform info
 PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
+
+# On macOS, use "universal" as arch since we build a fat binary
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    ARCH="universal"
+fi
+
 echo -e "${YELLOW}Platform: $PLATFORM-$ARCH${NC}"
 
 # Create output directory
@@ -103,6 +115,12 @@ ln -sf "onion-$PLATFORM-$ARCH" "$OUTPUT_DIR/onion"
 
 echo -e "${GREEN}=== Build Complete ===${NC}"
 echo -e "${GREEN}Binary location: $OUTPUT_DIR/onion-$PLATFORM-$ARCH${NC}"
+
+# On macOS, verify it's a universal binary
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo -e "${YELLOW}Verifying universal binary architectures:${NC}"
+    lipo -info "$OUTPUT_DIR/onion-$PLATFORM-$ARCH"
+fi
 
 # Verify binary works
 if "$OUTPUT_DIR/onion-$PLATFORM-$ARCH" -h &> /dev/null; then
