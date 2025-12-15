@@ -11,8 +11,7 @@ authors = [
     {name = "Digital Research Unit - Arab Center", email = "dru@dohainstitute.edu.qa"}
 ]
 readme = "README.md"
-license = "CC-BY-NC-SA-4.0"
-license-files = ["LICENSE"]
+license = {text = "CC-BY-NC-SA-4.0"}
 requires-python = ">=3.10"
 keywords = ["arabic", "nlp", "data-processing", "deduplication", "stemming", "readability", "quality"]
 classifiers = [
