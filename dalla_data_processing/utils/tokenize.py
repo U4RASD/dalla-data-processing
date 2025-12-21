@@ -20,70 +20,61 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-"""This module contains utilities for word-boundary tokenization."""
+"""Word-boundary tokenization utilities."""
 
 import re
 
-from camel_tools.utils.charsets import (
-    EMOJI_MULTICHAR_CHARSET,
-    UNICODE_LETTER_CHARSET,
-    UNICODE_LETTER_MARK_NUMBER_CHARSET,
-    UNICODE_MARK_CHARSET,
-    UNICODE_NUMBER_CHARSET,
-    UNICODE_PUNCT_SYMBOL_CHARSET,
-)
-
 __all__ = ["simple_word_tokenize"]
 
-
-_ALL_PUNCT_SYMBOLS = UNICODE_PUNCT_SYMBOL_CHARSET | EMOJI_MULTICHAR_CHARSET
-_ALL_PUNCT_SYMBOLS = [re.escape(x) for x in _ALL_PUNCT_SYMBOLS]
-_ALL_PUNCT_SYMBOLS = sorted(_ALL_PUNCT_SYMBOLS, key=len, reverse=True)
-_WHITESPACE_RE = r"\s+"
-_ALL_NUMBER = "".join(UNICODE_NUMBER_CHARSET)
-_ALL_LETTER_MARK = "".join(UNICODE_LETTER_CHARSET | UNICODE_MARK_CHARSET)
-_ALL_LETTER_MARK_NUMBER = "".join(UNICODE_LETTER_MARK_NUMBER_CHARSET)
-
-_TOKENIZE_RE = re.compile(
-    "|".join(_ALL_PUNCT_SYMBOLS)
-    + r"|["
-    + re.escape(_ALL_LETTER_MARK_NUMBER)
-    + r"]+|"
-    + _WHITESPACE_RE
+# Compact mode: Arabic + Latin + digits
+_ARABIC = (
+    r"\u0621-\u063A"
+    r"\u0641-\u064A"
+    r"\u064B-\u0652"
+    r"\u0653-\u0655"
+    r"\u0670"
+    r"\u0671-\u06D3"
+    r"\u06D5-\u06FF"
+    r"\u0750-\u077F"
+    r"\u08A0-\u08FF"
+    r"\uFB50-\uFDFF"
+    r"\uFE70-\uFEFF"
 )
-_TOKENIZE_NUMBER_RE = re.compile(
-    "|".join(_ALL_PUNCT_SYMBOLS)
-    + r"|["
-    + re.escape(_ALL_NUMBER)
-    + r"]+|["
-    + re.escape(_ALL_LETTER_MARK)
-    + r"]+"
-)
+_LATIN = r"a-zA-Z"
+_DIGITS = r"0-9\u0660-\u0669\u06F0-\u06F9"
+_COMPACT_CHARSET = _ARABIC + _LATIN + _DIGITS
+
+# Full mode: Unicode letters/marks/numbers (via \w which covers all Unicode word chars)
+_FULL_CHARSET = r"\w"
+
+# Pre-compiled regexes for compact mode
+_COMPACT_RE = re.compile(f"[{_COMPACT_CHARSET}]+|[^{_COMPACT_CHARSET}\\s]|\\s+")
+_COMPACT_SPLIT_RE = re.compile(f"[{_ARABIC}{_LATIN}]+|[{_DIGITS}]+|[^{_COMPACT_CHARSET}\\s]|\\s+")
+
+# Pre-compiled regexes for full mode
+_FULL_RE = re.compile(r"\w+|[^\w\s]|\s+")
+_FULL_SPLIT_RE = re.compile(r"[^\W\d]+|\d+|[^\w\s]|\s+")
 
 
-def simple_word_tokenize(sentence, split_digits=False):
-    """Tokenizes a sentence by splitting on whitespace and seperating
-    punctuation. The resulting tokens are either alpha-numeric words, single
-    punctuation/symbol/emoji characters, or multi-character emoji sequences.
-    This function is language agnostic and splits all characters marked as
-    punctuation or symbols in the Unicode specification.
-    For example, tokenizing :code:`'Hello,    world!!!'`
-    would yield :code:`['Hello', ',', 'world', '!', '!', '!']`.
-    If split_digits is set to True, it also splits on number.
-    For example, tokenizing :code:`'Hello,    world123!!!'`
-    would yield :code:`['Hello', ',', 'world', '123', '!', '!', '!']`.
+def simple_word_tokenize(sentence, split_digits=False, mode="compact"):
+    """Tokenize a sentence by splitting on whitespace and separating punctuation.
 
     Args:
-        sentence (:obj:`str`): Sentence to tokenize.
-        split_digits (:obj:`bool`, optional): The flag to split on number.
-            Defaults to False.
+        sentence: Sentence to tokenize.
+        split_digits: Split digits from letters. Defaults to False.
+        mode: "compact" (Arabic + Latin + digits) or "full" (all Unicode).
+            Defaults to "compact".
 
     Returns:
-        :obj:`list` of :obj:`str`: The list of tokens.
+        List of tokens.
     """
-
-    if split_digits:
-        return _TOKENIZE_NUMBER_RE.findall(sentence)
+    if mode == "compact":
+        if split_digits:
+            return _COMPACT_SPLIT_RE.findall(sentence)
+        return _COMPACT_RE.findall(sentence)
+    elif mode == "full":
+        if split_digits:
+            return _FULL_SPLIT_RE.findall(sentence)
+        return _FULL_RE.findall(sentence)
     else:
-        return _TOKENIZE_RE.findall(sentence)
+        raise ValueError(f"Unknown mode: {mode}. Use 'compact' or 'full'.")

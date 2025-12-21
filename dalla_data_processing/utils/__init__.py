@@ -1,8 +1,4 @@
-"""
-Utility functions for text processing.
-
-This module provides utilities for tokenization, text manipulation, and logging.
-"""
+"""Utility functions for text processing."""
 
 from dalla_data_processing.utils.logger import get_logger, logger, setup_logging
 
