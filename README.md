@@ -6,7 +6,7 @@ A comprehensive Arabic data processing pipeline with deduplication, stemming, qu
 
 - **Linux**: Fully supported
 - **macOS**: Fully supported (Intel or through rosetta)
-- **Windows**: Supported through WSL (Windows Subsystem for Linux) only, for native windows: manual build from source works for deduplication.
+- **Windows**: Supported through WSL only, for native windows: manual build from source works for deduplication.
 
 ## Installation
 
@@ -97,6 +97,5 @@ Pack and prepare datasets for training.
 
 ## Links
 
-- Homepage: https://github.com/U4RASD/dalla-data-processing
-- Issues: https://github.com/U4RASD/dalla-data-processing/issues
+- Homepage: https://acrps.ai
 - Documentation: https://github.com/U4RASD/dalla-data-processing#readme
