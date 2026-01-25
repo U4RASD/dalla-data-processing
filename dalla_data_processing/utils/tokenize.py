@@ -44,14 +44,13 @@ _LATIN = r"a-zA-Z"
 _DIGITS = r"0-9\u0660-\u0669\u06F0-\u06F9"
 _COMPACT_CHARSET = _ARABIC + _LATIN + _DIGITS
 
-# Full mode: Unicode letters/marks/numbers (via \w which covers all Unicode word chars)
+
 _FULL_CHARSET = r"\w"
 
-# Pre-compiled regexes for compact mode
+
 _COMPACT_RE = re.compile(f"[{_COMPACT_CHARSET}]+|[^{_COMPACT_CHARSET}\\s]|\\s+")
 _COMPACT_SPLIT_RE = re.compile(f"[{_ARABIC}{_LATIN}]+|[{_DIGITS}]+|[^{_COMPACT_CHARSET}\\s]|\\s+")
 
-# Pre-compiled regexes for full mode
 _FULL_RE = re.compile(r"\w+|[^\w\s]|\s+")
 _FULL_SPLIT_RE = re.compile(r"[^\W\d]+|\d+|[^\w\s]|\s+")
 
