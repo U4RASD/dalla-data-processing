@@ -47,7 +47,7 @@ pip install "dalla-data-processing[dedup,stem,quality]"
 
 ### Development Installation
 
-<b>From Source (with uv - recommended)</b>
+<b>From Source (with uv)</b>
 
 ```bash
 git clone https://github.com/U4RASD/dalla-data-processing.git
