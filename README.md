@@ -6,7 +6,7 @@ A comprehensive Arabic data processing pipeline with deduplication, stemming, qu
 
 - **Linux**: Fully supported
 - **macOS**: Fully supported (Intel or through rosetta)
-- **Windows**: Supported through WSL only, for native windows: manual build from source works for deduplication.
+- **Windows**: Supported through WSL, for native windows: manual build from source works for deduplication.
 
 ## Installation
 
