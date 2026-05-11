@@ -3,7 +3,6 @@
 # Run manually: pre-commit run --all-files
 
 repos:
-  # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.15
     hooks:
@@ -11,6 +10,5 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
-# Configuration
 default_language_version:
   python: python3.12
