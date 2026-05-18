@@ -12,13 +12,14 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}=== Building Onion Binary ===${NC}"
 
-# Get script directory and project root
+
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 ONION_SOURCE="$PROJECT_ROOT/dalla_data_processing/deduplication/onion/src_sc"
 OUTPUT_DIR="$PROJECT_ROOT/dalla_data_processing/deduplication/bin"
 
-# Check if source exists
+
 if [ ! -d "$ONION_SOURCE" ]; then
     echo -e "${RED}Error: Onion source not found at $ONION_SOURCE${NC}"
     exit 1
@@ -33,7 +34,7 @@ if ! command -v g++ &> /dev/null; then
     exit 1
 fi
 
-# Check for Google sparsehash
+
 echo -e "${YELLOW}Checking for Google sparsehash...${NC}"
 if ! echo '#include <google/sparse_hash_set>' | g++ -x c++ -c - -o /dev/null 2>/dev/null; then
     echo -e "${YELLOW}Warning: Google sparsehash headers not found${NC}"
