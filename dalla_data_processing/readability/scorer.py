@@ -1,11 +1,14 @@
 """
-Readability scoring using textstat library (Flesch Reading Ease).
+Readability scoring for Arabic text.
 
-For Arabic-specific Osman scoring, we use a simplified formula.
+Osman scores come from the textstat library. Flesch Reading Ease uses an Arabic
+syllable-based implementation (see arabic_flesch), since textstat's Flesch relies
+on pyphen, which has no Arabic support.
 """
 
 import textstat
 
+from dalla_data_processing.readability.arabic_flesch import arabic_flesch_reading_ease
 from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -31,8 +34,7 @@ class ReadabilityScorer:
         """
         Score text using both Flesch and Osman methods.
 
-        For very short texts where Flesch returns None, we use the Osman score.
-        If Osman also fails, we use a simple fallback based on word length.
+        If both scores fail, fall back to a simple estimate based on word length.
 
         Args:
             text: Text to score
@@ -46,13 +48,8 @@ class ReadabilityScorer:
         flesch_score = self._calculate_flesch(text)
         osman_score = self._calculate_osman(text)
 
-        # If Flesch fails but Osman succeeds, use Osman for both
-        if flesch_score is None and osman_score is not None:
-            logger.info(f"Flesch failed, using Osman score ({osman_score:.1f}) for both metrics")
-            flesch_score = osman_score
-
         # If both fail, use fallback as last resort
-        elif flesch_score is None and osman_score is None:
+        if flesch_score is None and osman_score is None:
             flesch_fallback, osman_fallback = self._calculate_fallback_scores(text)
             flesch_score = flesch_fallback
             osman_score = osman_fallback
@@ -64,9 +61,9 @@ class ReadabilityScorer:
 
     def _calculate_flesch(self, text: str) -> float | None:
         """
-        Calculate Flesch Reading Ease score.
+        Calculate Arabic Flesch Reading Ease score.
 
-        Score range: 0-100+
+        Higher scores indicate easier text (typically 0-100, but unbounded).
 
         Args:
             text: Text to score
@@ -75,7 +72,7 @@ class ReadabilityScorer:
             Flesch score or None if error
         """
         try:
-            score = self.textstat.flesch_reading_ease(text)
+            score = arabic_flesch_reading_ease(text)
             if score is None:
                 logger.debug(f"Flesch score is None for text (length={len(text)})")
                 return None
