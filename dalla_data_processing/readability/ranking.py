@@ -9,7 +9,7 @@ from dalla_data_processing.utils.logger import get_logger
 logger = get_logger(__name__)
 
 # Strategies for combining the Osman and Flesch bins into a final level.
-WEIGHTED = "weighted"          # Osman-dominant weighted average (default)
+WEIGHTED = "weighted"  # Osman-dominant weighted average (default)
 CONSERVATIVE = "conservative"  # legacy regime-split (Option B3)
 LEVEL_METHODS = (WEIGHTED, CONSERVATIVE)
 
