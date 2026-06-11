@@ -2,7 +2,11 @@
 
 from datasets import Dataset
 
-from dalla_data_processing.readability.ranking import compute_ranks_and_levels
+from dalla_data_processing.readability.ranking import (
+    OSMAN_WEIGHT,
+    WEIGHTED,
+    compute_ranks_and_levels,
+)
 from dalla_data_processing.readability.scorer import ReadabilityScorer
 from dalla_data_processing.utils.logger import get_logger
 
@@ -14,6 +18,8 @@ def score_readability(
     column: str = "text",
     add_ranks: bool = True,
     num_proc: int | None = None,
+    level_method: str = WEIGHTED,
+    osman_weight: float = OSMAN_WEIGHT,
 ) -> Dataset:
     """
     Score readability using Flesch and Osman methods, with optional ranking.
@@ -32,6 +38,8 @@ def score_readability(
         column: Column to score
         add_ranks: Whether to add ranking columns (default: True)
         num_proc: Number of parallel processes
+        level_method: Bin-combination strategy, "weighted" or "conservative"
+        osman_weight: Weight on the Osman bin when level_method="weighted"
 
     Returns:
         Dataset with readability scores and optional rankings
@@ -103,15 +111,17 @@ def score_readability(
 
     # Step 2: Add ranks if requested
     if add_ranks:
-        logger.info("Computing ranks and readability levels...")
-        scored_dataset = _add_ranks_to_dataset(scored_dataset)
+        logger.info(f"Computing ranks and readability levels (method={level_method})...")
+        scored_dataset = _add_ranks_to_dataset(scored_dataset, level_method, osman_weight)
         logger.info("Ranks and levels added")
 
     logger.info("Readability scoring complete!")
     return scored_dataset
 
 
-def _add_ranks_to_dataset(dataset: Dataset) -> Dataset:
+def _add_ranks_to_dataset(
+    dataset: Dataset, level_method: str = WEIGHTED, osman_weight: float = OSMAN_WEIGHT
+) -> Dataset:
     """
     Add ranking columns to dataset based on scores.
 
@@ -153,7 +163,9 @@ def _add_ranks_to_dataset(dataset: Dataset) -> Dataset:
         return dataset
 
     # Compute ranks and levels
-    o_ranks, f_ranks, final_levels = compute_ranks_and_levels(osman_scores, flesch_scores)
+    o_ranks, f_ranks, final_levels = compute_ranks_and_levels(
+        osman_scores, flesch_scores, method=level_method, osman_weight=osman_weight
+    )
 
     # Create mapping from index to rank data
     rank_data = {}

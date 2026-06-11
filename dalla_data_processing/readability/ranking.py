@@ -8,9 +8,21 @@ from dalla_data_processing.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# Strategies for combining the Osman and Flesch bins into a final level.
+WEIGHTED = "weighted"          # Osman-dominant weighted average (default)
+CONSERVATIVE = "conservative"  # legacy regime-split (Option B3)
+LEVEL_METHODS = (WEIGHTED, CONSERVATIVE)
+
+# Default weight on the Osman bin for the "weighted" method. Osman is the more
+# reliable signal for Arabic, so it dominates; Flesch only nudges the result.
+OSMAN_WEIGHT = 0.8
+
 
 def compute_ranks_and_levels(
-    osman_scores: list[float], flesch_scores: list[float]
+    osman_scores: list[float],
+    flesch_scores: list[float],
+    method: str = WEIGHTED,
+    osman_weight: float = OSMAN_WEIGHT,
 ) -> tuple[list[int], list[int], list[int]]:
     """
     Compute ranks and final readability levels.
@@ -18,11 +30,13 @@ def compute_ranks_and_levels(
     Methodology:
     1. Rank documents by Osman & Flesch (highest score = rank 1, easiest)
     2. Bin ranks into 5 levels (0-4) using quantiles (guarantees balanced bins)
-    3. Decide final level using smart conservative logic
+    3. Decide the final level from the two bins (see decide_final_level)
 
     Args:
         osman_scores: List of Osman scores
         flesch_scores: List of Flesch scores
+        method: How to combine the bins ("weighted" or "conservative")
+        osman_weight: Weight on the Osman bin when method="weighted"
 
     Returns:
         Tuple of:
@@ -51,7 +65,10 @@ def compute_ranks_and_levels(
     f_bins = bin_ranks(f_ranks)
 
     # Decide final level
-    final_levels = [decide_final_level(ob, fb) for ob, fb in zip(o_bins, f_bins, strict=True)]
+    final_levels = [
+        decide_final_level(ob, fb, method=method, osman_weight=osman_weight)
+        for ob, fb in zip(o_bins, f_bins, strict=True)
+    ]
 
     return (o_ranks, f_ranks, final_levels)
 
@@ -111,55 +128,48 @@ def bin_ranks(ranks: list[int]) -> list[int]:
     return bins
 
 
-def decide_final_level(o_bin: int, f_bin: int) -> int:
+def decide_final_level(
+    o_bin: int, f_bin: int, method: str = WEIGHTED, osman_weight: float = OSMAN_WEIGHT
+) -> int:
     """
-    Decide final readability level from Osman and Flesch bins.
+    Decide final readability level from the Osman and Flesch bins.
 
-    Strategy (Option B3 - Smart Conservative):
-    - Trust Osman when it indicates hardness (bins 3-4)
-    - Trust Flesch when it indicates easiness (bins 0-1)
-    - On complete disagreement (diff >= 2), be conservative (take harder)
-    - On small disagreement (diff = 1), average them
+    Two strategies are available:
 
-    Philosophy:
-    - Osman is the expert at identifying hard texts
-    - Flesch is the expert at identifying easy texts
-    - When metrics completely disagree, the text is unusual → mark as harder
-    - When metrics slightly disagree, compromise with average
+    "weighted" (default): an Osman-dominant weighted average,
+        round(osman_weight * o_bin + (1 - osman_weight) * f_bin).
+        For Arabic, Osman is the reliable signal (it carries Arabic-specific terms
+        such as faseeh and complex/long-word ratios that hold up on undiacritised
+        text), whereas Flesch depends on syllable counts that degrade without
+        diacritics. Flesch therefore only nudges the level rather than overriding it.
+
+    "conservative": the legacy regime-split (Option B3) — trust Osman when it
+        indicates hardness (bins 3-4), trust Flesch when it indicates easiness
+        (bins 0-1), take the harder bin on large disagreement, else average.
 
     Args:
         o_bin: Osman bin (0-4, 0=easiest, 4=hardest)
         f_bin: Flesch bin (0-4, 0=easiest, 4=hardest)
+        method: "weighted" or "conservative"
+        osman_weight: Weight on the Osman bin when method="weighted"
 
     Returns:
         Final level (0-4)
 
     Examples:
-        >>> decide_final_level(4, 0)  # Osman=hard, Flesch=easy → trust Osman
-        4
-        >>> decide_final_level(0, 4)  # Osman=easy, Flesch=hard → trust Flesch (unusual, conservative)
-        4
-        >>> decide_final_level(1, 0)  # Both easy, Flesch=easier → trust Flesch
-        0
-        >>> decide_final_level(3, 4)  # Both hard, Osman=easier → trust Osman
+        >>> decide_final_level(4, 0)                          # weighted, Osman dominates
         3
-        >>> decide_final_level(2, 3)  # Small disagreement → average (2+3+1)//2 = 3
-        3
+        >>> decide_final_level(0, 4, method="conservative")   # easy: trust Flesch -> hard
+        4
     """
-    # Strong Osman signal: text is hard (bins 3-4)
-    if o_bin >= 3:
-        return o_bin
-
-    # Strong Flesch signal: text is easy (bins 0-1)
-    if f_bin <= 1:
-        return f_bin
-
-    # Calculate disagreement magnitude
-    diff = abs(o_bin - f_bin)
-
-    # Complete disagreement (diff >= 2)
-    if diff >= 2:
-        return max(o_bin, f_bin)
-
-    # Small disagreement (diff = 1) or agreement
-    return (o_bin + f_bin + 1) // 2
+    if method == WEIGHTED:
+        return round(osman_weight * o_bin + (1 - osman_weight) * f_bin)
+    if method == CONSERVATIVE:
+        if o_bin >= 3:
+            return o_bin
+        if f_bin <= 1:
+            return f_bin
+        if abs(o_bin - f_bin) >= 2:
+            return max(o_bin, f_bin)
+        return (o_bin + f_bin + 1) // 2
+    raise ValueError(f"Unknown level method {method!r}; expected one of {LEVEL_METHODS}")
